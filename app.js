@@ -1,4 +1,4 @@
-const WEBHOOK_URL = "https://vtri87.app.n8n.cloud/webhook-test/translate";
+const WEBHOOK_URL = "https://vtri87.app.n8n.cloud/webhook/translate";
 
 const inputText = document.getElementById("inputText");
 const outputText = document.getElementById("outputText");
