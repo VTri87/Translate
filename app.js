@@ -1,4 +1,4 @@
-const WEBHOOK_URL = "http://localhost:5678/webhook/translate2";
+const WEBHOOK_URL = "http://localhost:5678/webhook/translate";
 
 const inputText = document.getElementById("inputText");
 const outputText = document.getElementById("outputText");
