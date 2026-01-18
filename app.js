@@ -1,4 +1,4 @@
-const WEBHOOK_URL = "http://localhost:5678/webhook/translate";
+const WEBHOOK_URL = "https://vtri87.app.n8n.cloud/webhook-test/translate";
 
 const inputText = document.getElementById("inputText");
 const outputText = document.getElementById("outputText");
@@ -12,6 +12,7 @@ const langToEl = document.getElementById("langTo");
 const swapBtn = document.getElementById("swapBtn");
 
 let direction = "de-vi";
+let lastTargetLang = "vi";
 
 function setStatus(text, isError = false) {
   statusEl.textContent = text;
@@ -32,6 +33,17 @@ function swapLanguages() {
   const to = direction === "de-vi" ? "Vietnamesisch" : "Deutsch";
   langFromEl.textContent = from;
   langToEl.textContent = to;
+}
+
+function pickVoiceForLang(langCode) {
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return null;
+  const langTag = langCode === "vi" ? "vi" : "de";
+  return (
+    voices.find(v => v.lang?.toLowerCase().startsWith(langTag)) ||
+    voices.find(v => v.lang?.toLowerCase().includes(langTag)) ||
+    null
+  );
 }
 
 async function translateText() {
@@ -67,6 +79,7 @@ async function translateText() {
     }
 
     outputText.value = data.translated || "";
+    lastTargetLang = data.target || (direction === "de-vi" ? "vi" : "de");
     setDetected(data.source, data.target);
     setStatus("Fertig");
   } catch (err) {
@@ -94,8 +107,13 @@ function speak() {
   }
 
   const utterance = new SpeechSynthesisUtterance(text);
-  const lang = direction === "de-vi" ? "vi-VN" : "de-DE";
-  utterance.lang = lang;
+  utterance.lang = lastTargetLang === "vi" ? "vi-VN" : "de-DE";
+
+  const voice = pickVoiceForLang(lastTargetLang);
+  if (voice) {
+    utterance.voice = voice;
+  }
+
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utterance);
 }
@@ -110,5 +128,9 @@ inputText.addEventListener("keydown", (e) => {
     translateText();
   }
 });
+
+window.speechSynthesis.onvoiceschanged = () => {
+  pickVoiceForLang(lastTargetLang);
+};
 
 setStatus("Bereit");
